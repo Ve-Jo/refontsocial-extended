@@ -1,8 +1,15 @@
 .gradle/
 build/
+bin/
+out/
+target/
 .idea/
 .vscode/
+.settings/
+.classpath
+.project
 *.iml
+*.class
 decompiled-src/
 extracted/
 original/
