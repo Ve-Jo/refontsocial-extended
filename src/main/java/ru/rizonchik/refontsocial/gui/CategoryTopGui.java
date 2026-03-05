@@ -1,5 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.bukkit.Bukkit
+ *  org.bukkit.Material
+ *  org.bukkit.OfflinePlayer
+ *  org.bukkit.entity.Player
+ *  org.bukkit.inventory.ItemStack
+ *  org.bukkit.inventory.meta.ItemMeta
+ *  org.bukkit.inventory.meta.SkullMeta
+ *  org.bukkit.plugin.Plugin
+ */
 package ru.rizonchik.refontsocial.gui;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -7,27 +25,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.plugin.Plugin;
 import ru.rizonchik.refontsocial.RefontSocial;
+import ru.rizonchik.refontsocial.gui.AbstractGui;
 import ru.rizonchik.refontsocial.service.ReputationService;
 import ru.rizonchik.refontsocial.storage.TopCategory;
 import ru.rizonchik.refontsocial.storage.model.PlayerRep;
 import ru.rizonchik.refontsocial.util.ItemUtil;
 import ru.rizonchik.refontsocial.util.NumberUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-public final class CategoryTopGui extends AbstractGui {
-
+public final class CategoryTopGui
+extends AbstractGui {
     private final RefontSocial plugin;
     private final ReputationService service;
     private final TopCategory category;
     private final int page;
-    private final Map<Integer, UUID> slotTargets = new HashMap<>();
-    private final Map<Integer, String> slotNames = new HashMap<>();
+    private final Map<Integer, UUID> slotTargets = new HashMap<Integer, UUID>();
+    private final Map<Integer, String> slotNames = new HashMap<Integer, String>();
 
     public CategoryTopGui(RefontSocial plugin, ReputationService service, TopCategory category, int page) {
         this.plugin = plugin;
@@ -38,88 +52,91 @@ public final class CategoryTopGui extends AbstractGui {
 
     @Override
     public void open(Player player) {
-        String titleTpl = plugin.getConfig().getString("gui.categoryTop.title", "Топ • %category%");
-        String title = titleTpl.replace("%category%", categoryRu(category));
-
-        int size = plugin.getConfig().getInt("gui.categoryTop.size", 54);
-        if (size < 9) size = 54;
-        if (size % 9 != 0) size = 54;
-
-        inventory = Bukkit.createInventory(null, size, title);
-
-        ItemStack filler = ItemUtil.fromGui(plugin, "filler");
-        for (int i = 0; i < inventory.getSize(); i++) inventory.setItem(i, filler);
-
+        String titleTpl = this.plugin.getConfig().getString("gui.categoryTop.title", "\u0422\u043e\u043f \u2022 %category%");
+        String title = titleTpl.replace("%category%", this.categoryRu(this.category));
+        int size = this.plugin.getConfig().getInt("gui.categoryTop.size", 54);
+        if (size < 9) {
+            size = 54;
+        }
+        if (size % 9 != 0) {
+            size = 54;
+        }
+        this.inventory = Bukkit.createInventory(null, (int)size, (String)title);
+        ItemStack filler = ItemUtil.fromGui(this.plugin, "filler", new String[0]);
+        for (int i = 0; i < this.inventory.getSize(); ++i) {
+            this.inventory.setItem(i, filler);
+        }
         ItemStack loading = new ItemStack(Material.PAPER);
         ItemMeta meta = loading.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§fЗагрузка...");
+            meta.setDisplayName("\u00a7f\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430...");
             loading.setItemMeta(meta);
         }
-        inventory.setItem(22, loading);
-
-        inventory.setItem(inventory.getSize() - 9, ItemUtil.fromGui(plugin, "back"));
-        inventory.setItem(inventory.getSize() - 1, ItemUtil.fromGui(plugin, "next"));
-
-        player.openInventory(inventory);
-
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            int pageSize = plugin.getConfig().getInt("gui.categoryTop.pageSize", 45);
-            if (pageSize < 1) pageSize = 45;
-
-            int offset = (page - 1) * pageSize;
-            List<PlayerRep> top = service.getTopCached(category, pageSize, offset);
-            List<String> names = new ArrayList<>(top.size());
-
+        this.inventory.setItem(22, loading);
+        this.inventory.setItem(this.inventory.getSize() - 9, ItemUtil.fromGui(this.plugin, "back", new String[0]));
+        this.inventory.setItem(this.inventory.getSize() - 1, ItemUtil.fromGui(this.plugin, "next", new String[0]));
+        player.openInventory(this.inventory);
+        Bukkit.getScheduler().runTaskAsynchronously((Plugin)this.plugin, () -> {
+            int pageSize = this.plugin.getConfig().getInt("gui.categoryTop.pageSize", 45);
+            if (pageSize < 1) {
+                pageSize = 45;
+            }
+            int offset = (this.page - 1) * pageSize;
+            List<PlayerRep> top = this.service.getTopCached(this.category, pageSize, offset);
+            ArrayList<String> names = new ArrayList<String>(top.size());
             for (PlayerRep rep : top) {
                 String name = rep.getName();
                 if (name == null || name.trim().isEmpty()) {
-                    name = service.getNameCached(rep.getUuid());
+                    name = this.service.getNameCached(rep.getUuid());
                 }
                 if (name == null || name.trim().isEmpty()) {
                     name = rep.getUuid().toString().substring(0, 8);
                 }
                 names.add(name);
             }
-
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                if (!player.isOnline()) return;
-                if (player.getOpenInventory() == null) return;
-                if (player.getOpenInventory().getTopInventory() == null) return;
-                if (!player.getOpenInventory().getTopInventory().equals(inventory)) return;
-
-                for (int i = 0; i < 45; i++) inventory.setItem(i, null);
-                slotTargets.clear();
-                slotNames.clear();
-
-                for (int i = 0; i < top.size() && i < 45; i++) {
-                    PlayerRep rep = top.get(i);
-
+            Bukkit.getScheduler().runTask((Plugin)this.plugin, () -> {
+                int i;
+                if (!player.isOnline()) {
+                    return;
+                }
+                if (player.getOpenInventory() == null) {
+                    return;
+                }
+                if (player.getOpenInventory().getTopInventory() == null) {
+                    return;
+                }
+                if (!player.getOpenInventory().getTopInventory().equals(this.inventory)) {
+                    return;
+                }
+                for (i = 0; i < 45; ++i) {
+                    this.inventory.setItem(i, null);
+                }
+                this.slotTargets.clear();
+                this.slotNames.clear();
+                for (i = 0; i < top.size() && i < 45; ++i) {
+                    PlayerRep rep = (PlayerRep)top.get(i);
                     ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-                    SkullMeta sm = (SkullMeta) head.getItemMeta();
-
-                    String name = names.size() > i ? names.get(i) : rep.getUuid().toString().substring(0, 8);
-
-                    sm.setDisplayName("§f#" + (offset + i + 1) + " §7— §f" + name);
-
-                    List<String> lore = new ArrayList<>();
-                    lore.add("§7Рейтинг: §f" + NumberUtil.formatScore(plugin, rep.getScore()));
-                    lore.add("§7Лайки: §a" + rep.getLikes() + " §7/ Дизлайки: §c" + rep.getDislikes());
-                    lore.add("§7Голосов: §f" + rep.getVotes());
+                    SkullMeta sm = (SkullMeta)head.getItemMeta();
+                    String name = names.size() > i ? (String)names.get(i) : rep.getUuid().toString().substring(0, 8);
+                    sm.setDisplayName("\u00a7f#" + (offset + i + 1) + " \u00a77\u2014 \u00a7f" + name);
+                    ArrayList<String> lore = new ArrayList<String>();
+                    lore.add("\u00a77\u0420\u0435\u0439\u0442\u0438\u043d\u0433: \u00a7f" + NumberUtil.formatScore(this.plugin, rep.getScore()));
+                    lore.add("\u00a77\u041b\u0430\u0439\u043a\u0438: \u00a7a" + rep.getLikes() + " \u00a77/ \u0414\u0438\u0437\u043b\u0430\u0439\u043a\u0438: \u00a7c" + rep.getDislikes());
+                    lore.add("\u00a77\u0413\u043e\u043b\u043e\u0441\u043e\u0432: \u00a7f" + rep.getVotes());
                     lore.add("");
-                    lore.add("§eНажми: открыть профиль");
+                    lore.add("\u00a7e\u041d\u0430\u0436\u043c\u0438: \u043e\u0442\u043a\u0440\u044b\u0442\u044c \u043f\u0440\u043e\u0444\u0438\u043b\u044c");
                     sm.setLore(lore);
-
                     try {
-                        OfflinePlayer off = Bukkit.getOfflinePlayer(rep.getUuid());
+                        OfflinePlayer off = Bukkit.getOfflinePlayer((UUID)rep.getUuid());
                         sm.setOwningPlayer(off);
-                    } catch (Throwable ignored) {
                     }
-
-                    head.setItemMeta(sm);
-                    inventory.setItem(i, head);
-                    slotTargets.put(i, rep.getUuid());
-                    slotNames.put(i, name);
+                    catch (Throwable throwable) {
+                        // empty catch block
+                    }
+                    head.setItemMeta((ItemMeta)sm);
+                    this.inventory.setItem(i, head);
+                    this.slotTargets.put(i, rep.getUuid());
+                    this.slotNames.put(i, name);
                 }
             });
         });
@@ -127,31 +144,40 @@ public final class CategoryTopGui extends AbstractGui {
 
     @Override
     public void onClick(Player player, int rawSlot, ItemStack clicked) {
-        if (rawSlot == inventory.getSize() - 9) {
+        if (rawSlot == this.inventory.getSize() - 9) {
             player.closeInventory();
             return;
         }
-
-        if (rawSlot == inventory.getSize() - 1) {
-            plugin.getGuiService().openCategoryTop(player, category, page + 1);
+        if (rawSlot == this.inventory.getSize() - 1) {
+            this.plugin.getGuiService().openCategoryTop(player, this.category, this.page + 1);
             return;
         }
-
-        if (rawSlot < 0 || rawSlot >= 45) return;
-        if (clicked == null || clicked.getType() != Material.PLAYER_HEAD) return;
-        if (!slotTargets.containsKey(rawSlot)) return;
-
-        UUID target = slotTargets.get(rawSlot);
-        String name = slotNames.get(rawSlot);
-
+        if (rawSlot < 0 || rawSlot >= 45) {
+            return;
+        }
+        if (clicked == null || clicked.getType() != Material.PLAYER_HEAD) {
+            return;
+        }
+        if (!this.slotTargets.containsKey(rawSlot)) {
+            return;
+        }
+        UUID target = this.slotTargets.get(rawSlot);
+        String name = this.slotNames.get(rawSlot);
         player.closeInventory();
-        Bukkit.getScheduler().runTask(plugin, () -> plugin.getGuiService().openProfile(player, target, name));
+        Bukkit.getScheduler().runTask((Plugin)this.plugin, () -> this.plugin.getGuiService().openProfile(player, target, name));
     }
 
     private String categoryRu(TopCategory c) {
-        if (c == TopCategory.LIKES) return "Лайки";
-        if (c == TopCategory.DISLIKES) return "Дизлайки";
-        if (c == TopCategory.VOTES) return "Голоса";
-        return "Рейтинг";
+        if (c == TopCategory.LIKES) {
+            return "\u041b\u0430\u0439\u043a\u0438";
+        }
+        if (c == TopCategory.DISLIKES) {
+            return "\u0414\u0438\u0437\u043b\u0430\u0439\u043a\u0438";
+        }
+        if (c == TopCategory.VOTES) {
+            return "\u0413\u043e\u043b\u043e\u0441\u0430";
+        }
+        return "\u0420\u0435\u0439\u0442\u0438\u043d\u0433";
     }
 }
+

@@ -1,12 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package ru.rizonchik.refontsocial.storage.model;
 
 import java.util.UUID;
 
 public final class PlayerRep {
-
     private final UUID uuid;
     private final String name;
-
     private final int likes;
     private final int dislikes;
     private final int votes;
@@ -22,26 +23,27 @@ public final class PlayerRep {
     }
 
     public UUID getUuid() {
-        return uuid;
+        return this.uuid;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public int getLikes() {
-        return likes;
+        return this.likes;
     }
 
     public int getDislikes() {
-        return dislikes;
+        return this.dislikes;
     }
 
     public int getVotes() {
-        return votes;
+        return this.votes;
     }
 
     public double getScore() {
-        return score;
+        return this.score;
     }
 }
+

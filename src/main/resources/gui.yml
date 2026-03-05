@@ -39,6 +39,15 @@ items:
       - "§7Дизлайки: §c%dislikes%"
       - "§7Голосов: §f%votes%"
 
+  profile_status:
+    material: HEART_OF_THE_SEA
+    name: "§fСоц. статус §7— §f%target%"
+    lore:
+      - "§7Пол: §f%gender_emoji% %gender%"
+      - "§7Брак: §f%married%"
+      - "§7Партнёр: §f%spouse%"
+      - "§7С: §f%since%"
+
 profile_info:
   material: PAPER
   name: "§fПрофиль §7— §f%target%"

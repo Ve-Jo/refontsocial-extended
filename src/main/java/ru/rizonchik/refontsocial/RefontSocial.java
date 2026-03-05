@@ -1,12 +1,40 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.bukkit.Bukkit
+ *  org.bukkit.command.CommandExecutor
+ *  org.bukkit.command.TabCompleter
+ *  org.bukkit.entity.Player
+ *  org.bukkit.event.HandlerList
+ *  org.bukkit.event.Listener
+ *  org.bukkit.plugin.Plugin
+ *  org.bukkit.plugin.java.JavaPlugin
+ */
 package ru.rizonchik.refontsocial;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.rizonchik.refontsocial.command.GenderCommand;
+import ru.rizonchik.refontsocial.command.LayCommand;
+import ru.rizonchik.refontsocial.command.MarriageCommand;
 import ru.rizonchik.refontsocial.command.ReputationCommand;
+import ru.rizonchik.refontsocial.command.SitCommand;
 import ru.rizonchik.refontsocial.gui.GuiService;
 import ru.rizonchik.refontsocial.listener.InteractionTracker;
 import ru.rizonchik.refontsocial.listener.SeenListener;
+import ru.rizonchik.refontsocial.service.GenderService;
+import ru.rizonchik.refontsocial.service.MarriageService;
+import ru.rizonchik.refontsocial.service.SitManager;
 import ru.rizonchik.refontsocial.placeholder.ReputationExpansion;
 import ru.rizonchik.refontsocial.service.ReputationService;
 import ru.rizonchik.refontsocial.storage.Storage;
@@ -15,222 +43,248 @@ import ru.rizonchik.refontsocial.storage.sql.MysqlStorage;
 import ru.rizonchik.refontsocial.storage.sql.SqliteStorage;
 import ru.rizonchik.refontsocial.storage.yaml.YamlStorage;
 import ru.rizonchik.refontsocial.util.LibraryManager;
+import ru.rizonchik.refontsocial.util.SaltStore;
+import ru.rizonchik.refontsocial.util.SecurityUtil;
 import ru.rizonchik.refontsocial.util.YamlUtil;
 
-import java.util.Locale;
-
-public final class RefontSocial extends JavaPlugin {
-
+public final class RefontSocial
+extends JavaPlugin {
     private Storage storage;
     private ReputationService reputationService;
     private GuiService guiService;
     private InteractionTracker interactionTracker;
-
     private SeenListener seenListener;
+    private MarriageService marriageService;
+    private GenderService genderService;
+    private SitManager sitManager;
 
-    @Override
     public void onEnable() {
-        saveDefaultConfig();
+        this.saveDefaultConfig();
         YamlUtil.saveResourceIfNotExists(this, "messages.yml");
         YamlUtil.saveResourceIfNotExists(this, "gui.yml");
         YamlUtil.saveResourceIfNotExists(this, "tags.yml");
-
-        reloadPlugin();
-
+        this.reloadPlugin();
         ReputationCommand cmd = new ReputationCommand(this);
-        if (getCommand("reputation") != null) {
-            getCommand("reputation").setExecutor(cmd);
-            getCommand("reputation").setTabCompleter(cmd);
+        if (this.getCommand("reputation") != null) {
+            this.getCommand("reputation").setExecutor((CommandExecutor)cmd);
+            this.getCommand("reputation").setTabCompleter((TabCompleter)cmd);
         }
-        if (getCommand("repreload") != null) {
-            getCommand("repreload").setExecutor(cmd);
+        if (this.getCommand("repreload") != null) {
+            this.getCommand("repreload").setExecutor((CommandExecutor)cmd);
         }
-
+        MarriageCommand marriageCommand = new MarriageCommand(this);
+        if (this.getCommand("marry") != null) {
+            this.getCommand("marry").setExecutor((CommandExecutor)marriageCommand);
+            this.getCommand("marry").setTabCompleter((TabCompleter)marriageCommand);
+        }
+        GenderCommand genderCommand = new GenderCommand(this);
+        if (this.getCommand("gender") != null) {
+            this.getCommand("gender").setExecutor((CommandExecutor)genderCommand);
+            this.getCommand("gender").setTabCompleter((TabCompleter)genderCommand);
+        }
+        SitCommand sitCommand = new SitCommand(this);
+        if (this.getCommand("sit") != null) {
+            this.getCommand("sit").setExecutor((CommandExecutor)sitCommand);
+        }
+        LayCommand layCommand = new LayCommand(this);
+        if (this.getCommand("lay") != null) {
+            this.getCommand("lay").setExecutor((CommandExecutor)layCommand);
+        }
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new ReputationExpansion(this).register();
-            getLogger().info("Hooked into PlaceholderAPI.");
+            this.getLogger().info("Hooked into PlaceholderAPI.");
         } else {
-            getLogger().info("PlaceholderAPI not found (softdepend). Placeholders disabled.");
+            this.getLogger().info("PlaceholderAPI not found (softdepend). Placeholders disabled.");
         }
-
-        getLogger().info("Enabled.");
+        this.getLogger().info("Enabled.");
     }
 
-    @Override
     public void onDisable() {
-        if (seenListener != null) {
-            HandlerList.unregisterAll(seenListener);
-            seenListener = null;
+        if (this.seenListener != null) {
+            HandlerList.unregisterAll((Listener)this.seenListener);
+            this.seenListener = null;
         }
-
-        if (interactionTracker != null) {
-            interactionTracker.shutdown();
-            HandlerList.unregisterAll(interactionTracker);
-            interactionTracker = null;
+        if (this.interactionTracker != null) {
+            this.interactionTracker.shutdown();
+            HandlerList.unregisterAll((Listener)this.interactionTracker);
+            this.interactionTracker = null;
         }
-
-        if (guiService != null) {
-            guiService.shutdown();
-            HandlerList.unregisterAll(guiService);
-            guiService = null;
+        if (this.guiService != null) {
+            this.guiService.shutdown();
+            HandlerList.unregisterAll((Listener)this.guiService);
+            this.guiService = null;
         }
-
-        if (reputationService != null) {
-            reputationService.shutdown();
-            reputationService = null;
+        if (this.reputationService != null) {
+            this.reputationService.shutdown();
+            this.reputationService = null;
         }
-
-        if (storage != null) {
-            storage.close();
-            storage = null;
+        if (this.marriageService != null) {
+            this.marriageService.shutdown();
+            this.marriageService = null;
         }
-
-        getLogger().info("Disabled.");
+        if (this.genderService != null) {
+            this.genderService.shutdown();
+            this.genderService = null;
+        }
+        if (this.sitManager != null) {
+            HandlerList.unregisterAll((Listener)this.sitManager);
+            this.sitManager.shutdown();
+            this.sitManager = null;
+        }
+        if (this.storage != null) {
+            this.storage.close();
+            this.storage = null;
+        }
+        this.getLogger().info("Disabled.");
     }
 
     public void reloadPlugin() {
-        reloadConfig();
-
-        String storageTypeStr = getConfig().getString("storage.type", "YAML")
-                .toUpperCase(Locale.ROOT);
-
+        StorageType storageType;
+        String path;
+        String ver;
+        String aid;
+        String gid;
+        boolean enabled;
+        this.reloadConfig();
+        String storageTypeStr = this.getConfig().getString("storage.type", "YAML").toUpperCase(Locale.ROOT);
         LibraryManager libs = new LibraryManager(this);
-
-        if (storageTypeStr.equals("SQLITE")) {
-            boolean enabled = getConfig().getBoolean("libraries.sqlite.enabled", true);
-            if (enabled) {
-                String gid = getConfig().getString("libraries.sqlite.groupId", "org.xerial");
-                String aid = getConfig().getString("libraries.sqlite.artifactId", "sqlite-jdbc");
-                String ver = getConfig().getString("libraries.sqlite.version", "3.46.0.0");
-                String path = gid.replace('.', '/') + "/" + aid + "/" + ver + "/" + aid + "-" + ver + ".jar";
-                libs.ensureDriverPresent("org.sqlite.JDBC", path, aid + "-" + ver + ".jar");
-            }
+        if (storageTypeStr.equals("SQLITE") && (enabled = this.getConfig().getBoolean("libraries.sqlite.enabled", true))) {
+            gid = this.getConfig().getString("libraries.sqlite.groupId", "org.xerial");
+            aid = this.getConfig().getString("libraries.sqlite.artifactId", "sqlite-jdbc");
+            ver = this.getConfig().getString("libraries.sqlite.version", "3.46.0.0");
+            path = gid.replace('.', '/') + "/" + aid + "/" + ver + "/" + aid + "-" + ver + ".jar";
+            libs.ensureDriverPresent("org.sqlite.JDBC", path, aid + "-" + ver + ".jar");
         }
-
-        if (storageTypeStr.equals("MYSQL")) {
-            boolean enabled = getConfig().getBoolean("libraries.mysql.enabled", true);
-            if (enabled) {
-                String gid = getConfig().getString("libraries.mysql.groupId", "com.mysql");
-                String aid = getConfig().getString("libraries.mysql.artifactId", "mysql-connector-j");
-                String ver = getConfig().getString("libraries.mysql.version", "8.0.33");
-                String path = gid.replace('.', '/') + "/" + aid + "/" + ver + "/" + aid + "-" + ver + ".jar";
-                libs.ensureDriverPresent("com.mysql.cj.jdbc.Driver", path, aid + "-" + ver + ".jar");
-            }
+        if (storageTypeStr.equals("MYSQL") && (enabled = this.getConfig().getBoolean("libraries.mysql.enabled", true))) {
+            gid = this.getConfig().getString("libraries.mysql.groupId", "com.mysql");
+            aid = this.getConfig().getString("libraries.mysql.artifactId", "mysql-connector-j");
+            ver = this.getConfig().getString("libraries.mysql.version", "8.0.33");
+            path = gid.replace('.', '/') + "/" + aid + "/" + ver + "/" + aid + "-" + ver + ".jar";
+            libs.ensureDriverPresent("com.mysql.cj.jdbc.Driver", path, aid + "-" + ver + ".jar");
         }
-
         YamlUtil.reloadMessages(this);
         YamlUtil.reloadGui(this);
         YamlUtil.reloadTags(this);
-
-        if (seenListener != null) {
-            HandlerList.unregisterAll(seenListener);
-            seenListener = null;
+        if (this.seenListener != null) {
+            HandlerList.unregisterAll((Listener)this.seenListener);
+            this.seenListener = null;
         }
-
-        if (interactionTracker != null) {
-            interactionTracker.shutdown();
-            HandlerList.unregisterAll(interactionTracker);
-            interactionTracker = null;
+        if (this.interactionTracker != null) {
+            this.interactionTracker.shutdown();
+            HandlerList.unregisterAll((Listener)this.interactionTracker);
+            this.interactionTracker = null;
         }
-
-        if (guiService != null) {
-            guiService.shutdown();
-            HandlerList.unregisterAll(guiService);
-            guiService = null;
+        if (this.guiService != null) {
+            this.guiService.shutdown();
+            HandlerList.unregisterAll((Listener)this.guiService);
+            this.guiService = null;
         }
-
-        if (reputationService != null) {
-            reputationService.shutdown();
-            reputationService = null;
+        if (this.reputationService != null) {
+            this.reputationService.shutdown();
+            this.reputationService = null;
         }
-
-        if (storage != null) {
-            storage.close();
-            storage = null;
+        if (this.marriageService != null) {
+            this.marriageService.shutdown();
+            this.marriageService = null;
         }
-
-        StorageType storageType;
+        if (this.genderService != null) {
+            this.genderService.shutdown();
+            this.genderService = null;
+        }
+        if (this.sitManager != null) {
+            HandlerList.unregisterAll((Listener)this.sitManager);
+            this.sitManager.shutdown();
+            this.sitManager = null;
+        }
+        if (this.storage != null) {
+            this.storage.close();
+            this.storage = null;
+        }
         try {
             storageType = StorageType.valueOf(storageTypeStr);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             storageType = StorageType.YAML;
         }
-
-        if (storageType == StorageType.MYSQL) {
-            storage = new MysqlStorage(this);
-        } else if (storageType == StorageType.YAML) {
-            storage = new YamlStorage(this);
-        } else {
-            storage = new SqliteStorage(this);
-        }
-
-        storage.init();
-
-        reputationService = new ReputationService(this, storage);
-        guiService = new GuiService(this, reputationService);
-
-        Bukkit.getScheduler().runTask(this, () -> {
-            final java.util.List<org.bukkit.entity.Player> online = new java.util.ArrayList<>(Bukkit.getOnlinePlayers());
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-                for (org.bukkit.entity.Player p : online) {
+        this.storage = storageType == StorageType.MYSQL ? new MysqlStorage(this) : (storageType == StorageType.YAML ? new YamlStorage(this) : new SqliteStorage(this));
+        this.storage.init();
+        this.marriageService = new MarriageService(this);
+        this.marriageService.init();
+        this.genderService = new GenderService(this);
+        this.genderService.init();
+        this.sitManager = new SitManager(this);
+        this.reputationService = new ReputationService(this, this.storage);
+        this.guiService = new GuiService(this, this.reputationService);
+        Bukkit.getScheduler().runTask((Plugin)this, () -> {
+            List<Player> online = new ArrayList<Player>(Bukkit.getOnlinePlayers());
+            Bukkit.getScheduler().runTaskAsynchronously((Plugin)this, () -> {
+                for (Player p : online) {
                     try {
-                        storage.markSeen(p.getUniqueId(), p.getName(), null);
-                    } catch (Throwable ignored) {
+                        this.storage.markSeen(p.getUniqueId(), p.getName(), null);
                     }
+                    catch (Throwable throwable) {}
                 }
             });
         });
-
-        getServer().getPluginManager().registerEvents(guiService, this);
-
-        seenListener = new SeenListener(this);
-        getServer().getPluginManager().registerEvents(seenListener, this);
-
-        Bukkit.getScheduler().runTask(this, () -> {
-            final java.util.List<org.bukkit.entity.Player> online = new java.util.ArrayList<>(Bukkit.getOnlinePlayers());
-
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-                String salt = ru.rizonchik.refontsocial.util.SaltStore.getOrCreate(this);
-
-                for (org.bukkit.entity.Player p : online) {
+        this.getServer().getPluginManager().registerEvents((Listener)this.guiService, (Plugin)this);
+        this.seenListener = new SeenListener(this);
+        this.getServer().getPluginManager().registerEvents((Listener)this.seenListener, (Plugin)this);
+        this.getServer().getPluginManager().registerEvents((Listener)this.sitManager, (Plugin)this);
+        Bukkit.getScheduler().runTask((Plugin)this, () -> {
+            List<Player> online = new ArrayList<Player>(Bukkit.getOnlinePlayers());
+            Bukkit.getScheduler().runTaskAsynchronously((Plugin)this, () -> {
+                String salt = SaltStore.getOrCreate(this);
+                for (Player p : online) {
                     String ip = null;
                     try {
                         if (p.getAddress() != null && p.getAddress().getAddress() != null) {
                             ip = p.getAddress().getAddress().getHostAddress();
                         }
-                    } catch (Throwable ignored) {
                     }
-
-                    String ipHash = (ip == null) ? null : ru.rizonchik.refontsocial.util.SecurityUtil.sha256(ip + "|" + salt);
-
+                    catch (Throwable throwable) {
+                        // empty catch block
+                    }
+                    String ipHash = ip == null ? null : SecurityUtil.sha256(ip + "|" + salt);
                     try {
-                        storage.markSeen(p.getUniqueId(), p.getName(), ipHash);
-                    } catch (Throwable ignored) {
+                        this.storage.markSeen(p.getUniqueId(), p.getName(), ipHash);
                     }
+                    catch (Throwable throwable) {}
                 }
             });
         });
-
-        boolean requireInteraction = getConfig().getBoolean("antiAbuse.requireInteraction.enabled", true);
+        boolean requireInteraction = this.getConfig().getBoolean("antiAbuse.requireInteraction.enabled", true);
         if (requireInteraction) {
-            interactionTracker = new InteractionTracker(this);
-            interactionTracker.start();
-            reputationService.setInteractionTracker(interactionTracker);
-            getServer().getPluginManager().registerEvents(interactionTracker, this);
+            this.interactionTracker = new InteractionTracker(this);
+            this.interactionTracker.start();
+            this.reputationService.setInteractionTracker(this.interactionTracker);
+            this.getServer().getPluginManager().registerEvents((Listener)this.interactionTracker, (Plugin)this);
         } else {
-            reputationService.setInteractionTracker(null);
+            this.reputationService.setInteractionTracker(null);
         }
     }
 
     public Storage getStorage() {
-        return storage;
+        return this.storage;
     }
 
     public ReputationService getReputationService() {
-        return reputationService;
+        return this.reputationService;
     }
 
     public GuiService getGuiService() {
-        return guiService;
+        return this.guiService;
+    }
+
+    public MarriageService getMarriageService() {
+        return this.marriageService;
+    }
+
+    public GenderService getGenderService() {
+        return this.genderService;
+    }
+
+    public SitManager getSitManager() {
+        return this.sitManager;
     }
 }
+

@@ -1,15 +1,15 @@
 storage:
-  type: YAML # SQLITE | MYSQL | YAML
+  type: MYSQL # SQLITE | MYSQL | YAML
 
   sqlite:
     file: "data.db" # Файл SQLite в папке плагина
 
   mysql:
-    host: "127.0.0.1"
+    host: "localhost"
     port: 3306
     database: "refontsocial"
     username: "root"
-    password: "password"
+    password: "change-me"
     useSSL: false
     serverTimezone: "UTC"
     params: "useUnicode=true&characterEncoding=utf8&autoReconnect=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false"
@@ -23,15 +23,15 @@ storage:
 rating:
   scale:
     min: 0.0 # Минимум шкалы рейтинга
-    max: 5.0 # Максимум шкалы рейтинга
-  defaultScore: 5.0 # Рейтинг без голосов
+    max: 100.0 # Максимум шкалы рейтинга
+  defaultScore: 10.0 # Рейтинг без голосов
   format: "#0.0"    # Формат вывода (в GUI/плейсах)
 
   # SIMPLE_RATIO: быстро скачет на 1-2 голосах
   # BAYESIAN: сглаживает первые голоса (рекомендую)
   algorithm: BAYESIAN
   bayesian:
-    priorVotes: 12 # Чем больше — тем стабильнее рейтинг на старте
+    priorVotes: 50 # Чем больше — тем стабильнее рейтинг на старте
 
 antiAbuse:
   preventSelfVote: true # Запрет накрутки себе
@@ -41,7 +41,7 @@ antiAbuse:
     requireTargetOnline: false   # true = оценка только если цель онлайн
 
   ipProtection:
-    enabled: false # Включить защиту от накрутки с одного IP
+    enabled: true # Включить защиту от накрутки с одного IP
     mode: SAME_IP_DENY # SAME_IP_DENY = запрет, SAME_IP_COOLDOWN = кулдаун
     cooldownSeconds: 86400 # Кулдаун для SAME_IP_COOLDOWN (в секундах)
 
@@ -67,6 +67,9 @@ reasons:
   maxReasonLength: 24 # Сейчас используется только как лимит (для будущих расширений)
 
 profile:
+  status:
+    slot: 15 # Слот иконки статуса (пол/брак) в профиле
+
   history:
     enabled: true # Показывать историю оценок в профиле
     showVoterNameMode: PERMISSION # ANONYMOUS | PERMISSION | ALWAYS
@@ -77,6 +80,43 @@ profile:
   topTags:
     enabled: true # Показывать топ-теги в профиле
     limit: 3 # Сколько тегов показывать
+
+marriage:
+  enabled: true
+  proposalExpireSeconds: 120
+  proximity:
+    enabled: true
+    radius: 50.0
+    checkPeriodTicks: 40
+  actions:
+    requiredDistance: 4.0
+  marriedText: "В браке"
+  singleText: "Не в браке"
+  notMarriedSpouseText: "-"
+  notMarriedSinceText: "-"
+  dateFormat: "dd.MM.yyyy HH:mm"
+
+gender:
+  default: "undisclosed"
+  allowSelfChange: true
+  tabEmojiColors:
+    male: "&b"
+    female: "&d"
+    nonbinary: "&5"
+    other: "&7"
+    undisclosed: ""
+  emojis:
+    male: "♂"
+    female: "♀"
+    nonbinary: "⚧"
+    other: "◌"
+    undisclosed: ""
+  labels:
+    male: "Мужской"
+    female: "Женский"
+    nonbinary: "Небинарный"
+    other: "Другое"
+    undisclosed: "Не указан"
 
 gui:
   top:
