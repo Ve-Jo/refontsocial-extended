@@ -43,5 +43,5 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
-    archiveName = 'RefontSocialExtended-' + project.version + '.jar'
+    archiveFileName = 'RefontSocialExtended-' + project.version + '.jar'
 }
