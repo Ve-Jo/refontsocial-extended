@@ -2,7 +2,7 @@ name: RefontSocialExtended
 version: '1.4.0-extended'
 main: ru.rizonchik.refontsocial.RefontSocial
 api-version: '1.16'
-softdepend: [PlaceholderAPI]
+softdepend: [PlaceholderAPI, ProtocolLib]
 
 commands:
   reputation:
@@ -28,11 +28,11 @@ commands:
     description: Sit on the ground
     usage: /sit
     permission: refontsocial.sit.use
-  lay:
-    aliases: [лежать]
-    description: Lay on the ground
-    usage: /lay
-    permission: refontsocial.lay.use
+  friends:
+    aliases: [friend]
+    description: Friends system command
+    usage: /friends
+    permission: refontsocial.friends.use
 
 permissions:
   refontsocial.use:
@@ -51,5 +51,5 @@ permissions:
     default: true
   refontsocial.sit.use:
     default: true
-  refontsocial.lay.use:
+  refontsocial.friends.use:
     default: true

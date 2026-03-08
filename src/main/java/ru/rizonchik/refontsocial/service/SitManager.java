@@ -1,7 +1,6 @@
 package ru.rizonchik.refontsocial.service;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Location;
@@ -31,7 +30,6 @@ import ru.rizonchik.refontsocial.util.Colors;
 public final class SitManager implements Listener {
     private final RefontSocial plugin;
     private final Map<UUID, ArmorStand> seats = new ConcurrentHashMap<UUID, ArmorStand>();
-    private final Map<UUID, ArmorStand> laying = new ConcurrentHashMap<UUID, ArmorStand>();
 
     public SitManager(RefontSocial plugin) {
         this.plugin = plugin;
@@ -51,33 +49,10 @@ public final class SitManager implements Listener {
             player.sendMessage(Colors.msg(this.plugin, "sitCannot"));
             return false;
         }
-        this.laying.remove(player.getUniqueId());
         player.setPose(Pose.STANDING);
         stand.addPassenger(player);
         this.seats.put(player.getUniqueId(), stand);
         player.sendMessage(Colors.msg(this.plugin, "sitStart"));
-        return true;
-    }
-
-    public boolean toggleLay(Player player) {
-        if (this.isLaying(player)) {
-            this.stopLaying(player, true, true);
-            return false;
-        }
-        if (!this.canLay(player)) {
-            player.sendMessage(Colors.msg(this.plugin, "layCannot"));
-            return false;
-        }
-        this.standUp(player, false);
-        ArmorStand stand = this.spawnLaySeat(player);
-        if (stand == null) {
-            player.sendMessage(Colors.msg(this.plugin, "layCannot"));
-            return false;
-        }
-        player.setPose(Pose.SLEEPING);
-        stand.addPassenger(player);
-        this.laying.put(player.getUniqueId(), stand);
-        player.sendMessage(Colors.msg(this.plugin, "layStart"));
         return true;
     }
 
@@ -88,35 +63,14 @@ public final class SitManager implements Listener {
                 this.standUp(player, false);
             }
         }
-        for (UUID uuid : this.laying.keySet()) {
-            Player player = this.plugin.getServer().getPlayer(uuid);
-            if (player != null) {
-                this.stopLaying(player, false, false);
-            }
-        }
         this.seats.clear();
-        this.laying.clear();
     }
 
     private boolean isSeated(Player player) {
         return this.seats.containsKey(player.getUniqueId());
     }
 
-    private boolean isLaying(Player player) {
-        return this.laying.containsKey(player.getUniqueId());
-    }
-
     private boolean canSit(Player player) {
-        if (player == null || player.isDead()) {
-            return false;
-        }
-        if (player.isInsideVehicle() || player.isSwimming() || player.isGliding()) {
-            return false;
-        }
-        return this.isSurfaceValid(player);
-    }
-
-    private boolean canLay(Player player) {
         if (player == null || player.isDead()) {
             return false;
         }
@@ -156,28 +110,6 @@ public final class SitManager implements Listener {
         return stand;
     }
 
-    private ArmorStand spawnLaySeat(Player player) {
-        Location seatLocation = this.getLayLocation(player);
-        if (seatLocation == null) {
-            return null;
-        }
-        World world = seatLocation.getWorld();
-        if (world == null) {
-            return null;
-        }
-        ArmorStand stand = (ArmorStand) world.spawnEntity(seatLocation, EntityType.ARMOR_STAND);
-        stand.setVisible(false);
-        stand.setSmall(true);
-        stand.setMarker(true);
-        stand.setGravity(false);
-        stand.setBasePlate(false);
-        stand.setCanPickupItems(false);
-        stand.setInvulnerable(true);
-        stand.setCollidable(false);
-        stand.setRotation(player.getLocation().getYaw(), 0.0f);
-        return stand;
-    }
-
     private Location getSeatLocation(Player player) {
         Location loc = player.getLocation();
         Block below = loc.getBlock().getRelative(BlockFace.DOWN);
@@ -189,16 +121,6 @@ public final class SitManager implements Listener {
         if (data instanceof Slab || data instanceof Stairs) {
             y -= 0.5;
         }
-        return new Location(loc.getWorld(), below.getX() + 0.5, y, below.getZ() + 0.5, loc.getYaw(), loc.getPitch());
-    }
-
-    private Location getLayLocation(Player player) {
-        Location loc = player.getLocation();
-        Block below = loc.getBlock().getRelative(BlockFace.DOWN);
-        if (below.getType() == Material.AIR) {
-            return null;
-        }
-        double y = below.getY() + 0.2;
         return new Location(loc.getWorld(), below.getX() + 0.5, y, below.getZ() + 0.5, loc.getYaw(), loc.getPitch());
     }
 
@@ -214,39 +136,16 @@ public final class SitManager implements Listener {
         }
     }
 
-    private void stopLaying(Player player, boolean notify) {
-        this.stopLaying(player, notify, true);
-    }
-
-    private void stopLaying(Player player, boolean notify, boolean lift) {
-        UUID uuid = player.getUniqueId();
-        ArmorStand stand = this.laying.remove(uuid);
-        if (stand != null) {
-            stand.removePassenger(player);
-            stand.remove();
-        }
-        player.setPose(Pose.STANDING);
-        if (lift) {
-            Location loc = player.getLocation();
-            player.teleport(new Location(loc.getWorld(), loc.getX(), loc.getY() + 1.0, loc.getZ(), loc.getYaw(), loc.getPitch()));
-        }
-        if (notify) {
-            player.sendMessage(Colors.msg(this.plugin, "layStop"));
-        }
-    }
-
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         this.standUp(player, false);
-        this.stopLaying(player, false);
     }
 
     @EventHandler
     public void onTeleport(PlayerTeleportEvent event) {
         Player player = event.getPlayer();
         this.standUp(player, false);
-        this.stopLaying(player, false, false);
     }
 
     @EventHandler
@@ -260,9 +159,6 @@ public final class SitManager implements Listener {
         if (this.isSeated(player)) {
             this.standUp(player, false);
         }
-        if (this.isLaying(player)) {
-            this.stopLaying(player, false);
-        }
     }
 
     @EventHandler
@@ -271,16 +167,12 @@ public final class SitManager implements Listener {
         if (this.isSeated(player)) {
             this.standUp(player, true);
         }
-        if (this.isLaying(player)) {
-            this.stopLaying(player, true);
-        }
     }
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         this.standUp(player, false);
-        this.stopLaying(player, false);
     }
 
     @EventHandler
@@ -292,9 +184,6 @@ public final class SitManager implements Listener {
         Player player = (Player) entity;
         if (this.isSeated(player)) {
             this.standUp(player, false);
-        }
-        if (this.isLaying(player)) {
-            this.stopLaying(player, false);
         }
     }
 }

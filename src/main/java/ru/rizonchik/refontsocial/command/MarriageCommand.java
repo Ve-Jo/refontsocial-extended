@@ -203,6 +203,7 @@ public final class MarriageCommand implements CommandExecutor, TabCompleter {
                 spouse.sendMessage(Colors.msg(this.plugin, "marriageHugOther", "%target%", player.getName()));
                 player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0.0, 1.0, 0.0), 14, 0.35, 0.4, 0.35, 0.0);
                 spouse.getWorld().spawnParticle(Particle.CLOUD, spouse.getLocation().add(0.0, 1.0, 0.0), 14, 0.35, 0.4, 0.35, 0.0);
+                this.plugin.getVisualIndicatorsHook().spawnSocialIndicator(player, spouse, "hug");
                 return true;
             }
 
@@ -211,6 +212,7 @@ public final class MarriageCommand implements CommandExecutor, TabCompleter {
                 spouse.sendMessage(Colors.msg(this.plugin, "marriageKissOther", "%target%", player.getName()));
                 player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0.0, 1.2, 0.0), 4, 0.25, 0.3, 0.25, 0.0);
                 spouse.getWorld().spawnParticle(Particle.HEART, spouse.getLocation().add(0.0, 1.2, 0.0), 4, 0.25, 0.3, 0.25, 0.0);
+                this.plugin.getVisualIndicatorsHook().spawnSocialIndicator(player, spouse, "kiss");
                 return true;
             }
 
@@ -219,6 +221,7 @@ public final class MarriageCommand implements CommandExecutor, TabCompleter {
                     player.leaveVehicle();
                     player.sendMessage(Colors.msg(this.plugin, "marriageCarryStoppedSelf", "%target%", spouse.getName()));
                     spouse.sendMessage(Colors.msg(this.plugin, "marriageCarryStoppedOther", "%target%", player.getName()));
+                    this.plugin.getVisualIndicatorsHook().spawnSocialIndicator(player, spouse, "carry_stop");
                     return true;
                 }
                 player.sendMessage(Colors.msg(this.plugin, "marriageCarryAlreadyRiding"));
@@ -231,6 +234,7 @@ public final class MarriageCommand implements CommandExecutor, TabCompleter {
             }
             player.sendMessage(Colors.msg(this.plugin, "marriageCarryStartedSelf", "%target%", spouse.getName()));
             spouse.sendMessage(Colors.msg(this.plugin, "marriageCarryStartedOther", "%target%", player.getName()));
+            this.plugin.getVisualIndicatorsHook().spawnSocialIndicator(player, spouse, "carry");
             return true;
         }
 

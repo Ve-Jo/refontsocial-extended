@@ -24,19 +24,21 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.rizonchik.refontsocial.command.FriendsCommand;
 import ru.rizonchik.refontsocial.command.GenderCommand;
-import ru.rizonchik.refontsocial.command.LayCommand;
 import ru.rizonchik.refontsocial.command.MarriageCommand;
 import ru.rizonchik.refontsocial.command.ReputationCommand;
 import ru.rizonchik.refontsocial.command.SitCommand;
 import ru.rizonchik.refontsocial.gui.GuiService;
+import ru.rizonchik.refontsocial.listener.FriendsListener;
 import ru.rizonchik.refontsocial.listener.InteractionTracker;
 import ru.rizonchik.refontsocial.listener.SeenListener;
+import ru.rizonchik.refontsocial.placeholder.ReputationExpansion;
+import ru.rizonchik.refontsocial.service.FriendsService;
 import ru.rizonchik.refontsocial.service.GenderService;
 import ru.rizonchik.refontsocial.service.MarriageService;
-import ru.rizonchik.refontsocial.service.SitManager;
-import ru.rizonchik.refontsocial.placeholder.ReputationExpansion;
 import ru.rizonchik.refontsocial.service.ReputationService;
+import ru.rizonchik.refontsocial.service.SitManager;
 import ru.rizonchik.refontsocial.storage.Storage;
 import ru.rizonchik.refontsocial.storage.StorageType;
 import ru.rizonchik.refontsocial.storage.sql.MysqlStorage;
@@ -45,6 +47,7 @@ import ru.rizonchik.refontsocial.storage.yaml.YamlStorage;
 import ru.rizonchik.refontsocial.util.LibraryManager;
 import ru.rizonchik.refontsocial.util.SaltStore;
 import ru.rizonchik.refontsocial.util.SecurityUtil;
+import ru.rizonchik.refontsocial.util.VisualIndicatorsHook;
 import ru.rizonchik.refontsocial.util.YamlUtil;
 
 public final class RefontSocial
@@ -54,15 +57,19 @@ extends JavaPlugin {
     private GuiService guiService;
     private InteractionTracker interactionTracker;
     private SeenListener seenListener;
+    private FriendsListener friendsListener;
     private MarriageService marriageService;
     private GenderService genderService;
+    private FriendsService friendsService;
     private SitManager sitManager;
+    private VisualIndicatorsHook visualIndicatorsHook;
 
     public void onEnable() {
         this.saveDefaultConfig();
         YamlUtil.saveResourceIfNotExists(this, "messages.yml");
         YamlUtil.saveResourceIfNotExists(this, "gui.yml");
         YamlUtil.saveResourceIfNotExists(this, "tags.yml");
+        this.visualIndicatorsHook = new VisualIndicatorsHook(this);
         this.reloadPlugin();
         ReputationCommand cmd = new ReputationCommand(this);
         if (this.getCommand("reputation") != null) {
@@ -86,9 +93,10 @@ extends JavaPlugin {
         if (this.getCommand("sit") != null) {
             this.getCommand("sit").setExecutor((CommandExecutor)sitCommand);
         }
-        LayCommand layCommand = new LayCommand(this);
-        if (this.getCommand("lay") != null) {
-            this.getCommand("lay").setExecutor((CommandExecutor)layCommand);
+        FriendsCommand friendsCommand = new FriendsCommand(this);
+        if (this.getCommand("friends") != null) {
+            this.getCommand("friends").setExecutor((CommandExecutor)friendsCommand);
+            this.getCommand("friends").setTabCompleter((TabCompleter)friendsCommand);
         }
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new ReputationExpansion(this).register();
@@ -103,6 +111,10 @@ extends JavaPlugin {
         if (this.seenListener != null) {
             HandlerList.unregisterAll((Listener)this.seenListener);
             this.seenListener = null;
+        }
+        if (this.friendsListener != null) {
+            HandlerList.unregisterAll((Listener)this.friendsListener);
+            this.friendsListener = null;
         }
         if (this.interactionTracker != null) {
             this.interactionTracker.shutdown();
@@ -125,6 +137,10 @@ extends JavaPlugin {
         if (this.genderService != null) {
             this.genderService.shutdown();
             this.genderService = null;
+        }
+        if (this.friendsService != null) {
+            this.friendsService.shutdown();
+            this.friendsService = null;
         }
         if (this.sitManager != null) {
             HandlerList.unregisterAll((Listener)this.sitManager);
@@ -212,6 +228,8 @@ extends JavaPlugin {
         this.marriageService.init();
         this.genderService = new GenderService(this);
         this.genderService.init();
+        this.friendsService = new FriendsService(this);
+        this.friendsService.init();
         this.sitManager = new SitManager(this);
         this.reputationService = new ReputationService(this, this.storage);
         this.guiService = new GuiService(this, this.reputationService);
@@ -229,6 +247,8 @@ extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents((Listener)this.guiService, (Plugin)this);
         this.seenListener = new SeenListener(this);
         this.getServer().getPluginManager().registerEvents((Listener)this.seenListener, (Plugin)this);
+        this.friendsListener = new FriendsListener(this, this.friendsService);
+        this.getServer().getPluginManager().registerEvents((Listener)this.friendsListener, (Plugin)this);
         this.getServer().getPluginManager().registerEvents((Listener)this.sitManager, (Plugin)this);
         Bukkit.getScheduler().runTask((Plugin)this, () -> {
             List<Player> online = new ArrayList<Player>(Bukkit.getOnlinePlayers());
@@ -281,6 +301,14 @@ extends JavaPlugin {
 
     public GenderService getGenderService() {
         return this.genderService;
+    }
+
+    public FriendsService getFriendsService() {
+        return this.friendsService;
+    }
+
+    public VisualIndicatorsHook getVisualIndicatorsHook() {
+        return this.visualIndicatorsHook;
     }
 
     public SitManager getSitManager() {

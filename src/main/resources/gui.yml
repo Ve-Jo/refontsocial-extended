@@ -94,3 +94,21 @@ profile_info:
     name: "%reason%"
     lore:
       - "§7Нажми, чтобы выбрать"
+
+  friends_entry:
+    material: PLAYER_HEAD
+    name: "§f%player%"
+    lore:
+      - "§7Статус: %status%"
+      - "§7Наиграно: §f%playtime%"
+      - "§7Последний вход: §f%last_join%"
+      - "§7Дружите с: §f%since%"
+      - ""
+      - "§eНажми, чтобы открыть профиль"
+
+  friends_empty:
+    material: PAPER
+    name: "§fДрузья"
+    lore:
+      - "§7Список друзей пуст."
+      - "§7Используй §f/friends add <ник>§7."

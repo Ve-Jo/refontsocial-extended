@@ -17,6 +17,7 @@ repositories {
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.11.6'
+    compileOnly files('/var/lib/pterodactyl/volumes/4a83b6c1-628f-4166-99e7-5ce85d8bb57a/plugins/ProtocolLib.jar')
     implementation 'com.zaxxer:HikariCP:5.1.0'
 }
 

@@ -5,11 +5,11 @@ storage:
     file: "data.db" # Файл SQLite в папке плагина
 
   mysql:
-    host: "localhost"
+    host: "ptero-mariadb"
     port: 3306
-    database: "refontsocial"
-    username: "root"
-    password: "change-me"
+    database: "minecraft"
+    username: "minecraft"
+    password: "smp_password"
     useSSL: false
     serverTimezone: "UTC"
     params: "useUnicode=true&characterEncoding=utf8&autoReconnect=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false"
@@ -96,6 +96,18 @@ marriage:
   notMarriedSinceText: "-"
   dateFormat: "dd.MM.yyyy HH:mm"
 
+friends:
+  enabled: true
+  requestExpireSeconds: 120
+  joinLeaveMessages:
+    enabled: true
+  actions:
+    requiredDistance: 4.0
+  dateFormat: "dd.MM.yyyy HH:mm"
+  notPlayedText: "-"
+  statusOnline: "§aОнлайн"
+  statusOffline: "§7Оффлайн"
+
 gender:
   default: "undisclosed"
   allowSelfChange: true
@@ -138,6 +150,11 @@ gui:
 
   categoryTop:
     title: "§x§C§4§8§4§E§2Т§x§C§4§8§8§E§1о§x§C§4§8§C§E§0п §7• §f%category%"
+    size: 54
+    pageSize: 45
+
+  friends:
+    title: "§x§C§4§8§4§E§2Д§x§C§4§8§8§E§1р§x§C§4§8§C§E§0у§x§C§4§9§0§D§Fз§x§C§3§9§4§D§Eь§x§C§3§9§8§D§Dя"
     size: 54
     pageSize: 45
 

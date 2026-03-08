@@ -15,6 +15,7 @@ import org.bukkit.OfflinePlayer;
 import ru.rizonchik.refontsocial.RefontSocial;
 import ru.rizonchik.refontsocial.model.Gender;
 import ru.rizonchik.refontsocial.model.MarriageInfo;
+import ru.rizonchik.refontsocial.service.FriendsService;
 import ru.rizonchik.refontsocial.service.GenderService;
 import ru.rizonchik.refontsocial.storage.TopCategory;
 import ru.rizonchik.refontsocial.storage.model.PlayerRep;
@@ -90,6 +91,16 @@ extends PlaceholderExpansion {
                 return info.isMarried() ? this.formatMarriageDuration(info.getSinceMillis()) : this.plugin.getConfig().getString("marriage.notMarriedSinceText", "-");
             }
             return info.isMarried() ? this.plugin.getMarriageService().getMarriageSinceFormatted(uuid) : this.plugin.getConfig().getString("marriage.notMarriedSinceText", "-");
+        }
+        if (p.equals("friends_count") || p.equals("friends_online")) {
+            FriendsService friendsService = this.plugin.getFriendsService();
+            if (friendsService == null || !friendsService.isEnabled()) {
+                return "0";
+            }
+            if (p.equals("friends_online")) {
+                return String.valueOf(friendsService.getOnlineFriendsCount(uuid));
+            }
+            return String.valueOf(friendsService.getFriendsCount(uuid));
         }
         if (p.equals("score") || p.equals("likes") || p.equals("dislikes") || p.equals("votes") || p.equals("rank")) {
             PlayerRep rep = this.plugin.getReputationService().getOrCreate(uuid, player.getName() != null ? player.getName() : "\u0418\u0433\u0440\u043e\u043a");

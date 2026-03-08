@@ -23,10 +23,12 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import ru.rizonchik.refontsocial.RefontSocial;
 import ru.rizonchik.refontsocial.gui.AbstractGui;
 import ru.rizonchik.refontsocial.gui.CategoryTopGui;
+import ru.rizonchik.refontsocial.gui.FriendsGui;
 import ru.rizonchik.refontsocial.gui.ProfileGui;
 import ru.rizonchik.refontsocial.gui.RateGui;
 import ru.rizonchik.refontsocial.gui.ReasonsGui;
 import ru.rizonchik.refontsocial.service.ReputationService;
+import ru.rizonchik.refontsocial.service.FriendsService;
 import ru.rizonchik.refontsocial.storage.TopCategory;
 
 public final class GuiService
@@ -60,6 +62,16 @@ implements Listener {
         ProfileGui gui = new ProfileGui(this.plugin, this.service, target, targetName);
         this.open.put(player.getUniqueId(), gui);
         ((AbstractGui)gui).open(player);
+    }
+
+    public void openFriends(Player player, int page) {
+        FriendsService friendsService = this.plugin.getFriendsService();
+        if (friendsService == null || !friendsService.isEnabled()) {
+            return;
+        }
+        FriendsGui gui = new FriendsGui(this.plugin, friendsService, page);
+        this.open.put(player.getUniqueId(), gui);
+        gui.open(player);
     }
 
     public void openReasons(Player player, UUID target, String targetName, boolean like) {
