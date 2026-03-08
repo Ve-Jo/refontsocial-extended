@@ -1,5 +1,5 @@
 name: RefontSocialExtended
-version: '1.4.0-extended'
+version: '1.5.0'
 main: ru.rizonchik.refontsocial.RefontSocial
 api-version: '1.16'
 softdepend: [PlaceholderAPI, ProtocolLib]
