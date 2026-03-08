@@ -31,6 +31,8 @@ import org.bukkit.plugin.Plugin;
 import ru.rizonchik.refontsocial.RefontSocial;
 import ru.rizonchik.refontsocial.gui.AbstractGui;
 import ru.rizonchik.refontsocial.model.MarriageInfo;
+import ru.rizonchik.refontsocial.service.AgeService;
+import ru.rizonchik.refontsocial.service.CountryService;
 import ru.rizonchik.refontsocial.service.GenderService;
 import ru.rizonchik.refontsocial.service.MarriageService;
 import ru.rizonchik.refontsocial.service.ReputationService;
@@ -96,9 +98,16 @@ extends AbstractGui {
             List<VoteLogEntry> history = historyEnabled ? this.plugin.getStorage().getRecentVotes(this.target, limit, includeVoter) : Collections.emptyList();
             MarriageService marriageService = this.plugin.getMarriageService();
             GenderService genderService = this.plugin.getGenderService();
+            CountryService countryService = this.plugin.getCountryService();
+            AgeService ageService = this.plugin.getAgeService();
             MarriageInfo marriageInfo = marriageService != null ? marriageService.getMarriage(this.target) : MarriageInfo.single();
             String genderLabel = genderService != null ? genderService.getGenderLabel(this.target) : this.plugin.getConfig().getString("gender.labels.undisclosed", "Undisclosed");
             String genderEmoji = genderService != null ? genderService.getGenderEmoji(this.target, true) : "";
+            String country = countryService != null ? countryService.getCountry(this.target) : "";
+            String countryDisplay = countryService != null ? countryService.getCountryDisplay(country) : "Not specified";
+            String birthday = ageService != null ? ageService.getBirthday(this.target) : "";
+            String birthdayDisplay = ageService != null ? ageService.getBirthdayDisplay(this.target) : "Not specified";
+            String ageDisplay = ageService != null ? ageService.getAgeDisplay(this.target) : "Not specified";
             String marriedLabel = marriageInfo.isMarried() ? this.plugin.getConfig().getString("marriage.marriedText", "Married") : this.plugin.getConfig().getString("marriage.singleText", "Single");
             String spouseName = marriageInfo.isMarried() && marriageService != null ? marriageService.getSpouseName(this.target) : this.plugin.getConfig().getString("marriage.notMarriedSpouseText", "-");
             String marriageSince = marriageInfo.isMarried() && marriageService != null ? marriageService.getMarriageSinceFormatted(this.target) : this.plugin.getConfig().getString("marriage.notMarriedSinceText", "-");
@@ -111,6 +120,11 @@ extends AbstractGui {
             List<VoteLogEntry> historyFinal = history;
             String genderLabelFinal = genderLabel;
             String genderEmojiFinal = genderEmoji;
+            String countryFinal = country;
+            String countryDisplayFinal = countryDisplay;
+            String birthdayFinal = birthday;
+            String birthdayDisplayFinal = birthdayDisplay;
+            String ageDisplayFinal = ageDisplay;
             String marriedLabelFinal = marriedLabel;
             String spouseNameFinal = spouseName;
             String marriageSinceFinal = marriageSince;
@@ -161,9 +175,21 @@ extends AbstractGui {
                     head.setItemMeta((ItemMeta)sm);
                 }
                 this.inventory.setItem(13, head);
-                int statusSlot = this.plugin.getConfig().getInt("profile.status.slot", 15);
-                if (statusSlot >= 0 && statusSlot < this.inventory.getSize() - 9) {
-                    this.inventory.setItem(statusSlot, ItemUtil.fromGui(this.plugin, "profile_status", "%target%", this.targetName, "%gender%", genderLabelFinal, "%gender_emoji%", genderEmojiFinal, "%married%", marriedLabelFinal, "%spouse%", spouseNameFinal, "%since%", marriageSinceFinal));
+                int countrySlot = this.plugin.getConfig().getInt("profile.country.slot", 20);
+                if (countrySlot >= 0 && countrySlot < this.inventory.getSize() - 9 && countryService != null) {
+                    this.inventory.setItem(countrySlot, ItemUtil.fromGui(this.plugin, "profile_country", "%country%", countryDisplayFinal));
+                }
+                int birthdaySlot = this.plugin.getConfig().getInt("profile.birthday.slot", 21);
+                if (birthdaySlot >= 0 && birthdaySlot < this.inventory.getSize() - 9 && ageService != null) {
+                    this.inventory.setItem(birthdaySlot, ItemUtil.fromGui(this.plugin, "profile_birthday", "%birthday%", birthdayDisplayFinal, "%age%", ageDisplayFinal));
+                }
+                int genderSlot = this.plugin.getConfig().getInt("profile.gender.slot", 23);
+                if (genderSlot >= 0 && genderSlot < this.inventory.getSize() - 9 && genderService != null) {
+                    this.inventory.setItem(genderSlot, ItemUtil.fromGui(this.plugin, "profile_gender", "%gender%", genderLabelFinal, "%gender_emoji%", genderEmojiFinal));
+                }
+                int marriageSlot = this.plugin.getConfig().getInt("profile.marriage.slot", 24);
+                if (marriageSlot >= 0 && marriageSlot < this.inventory.getSize() - 9 && marriageService != null) {
+                    this.inventory.setItem(marriageSlot, ItemUtil.fromGui(this.plugin, "profile_marriage", "%married%", marriedLabelFinal, "%spouse%", spouseNameFinal, "%since%", marriageSinceFinal));
                 }
                 if (historyEnabledFinal) {
                     ItemStack book = new ItemStack(Material.BOOK);

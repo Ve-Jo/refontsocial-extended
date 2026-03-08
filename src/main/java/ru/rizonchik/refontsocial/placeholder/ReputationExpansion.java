@@ -102,6 +102,30 @@ extends PlaceholderExpansion {
             }
             return String.valueOf(friendsService.getFriendsCount(uuid));
         }
+        if (p.equals("country")) {
+            if (this.plugin.getCountryService() == null) {
+                return notFound;
+            }
+            return this.plugin.getCountryService().getCountry(uuid);
+        }
+        if (p.equals("age")) {
+            if (this.plugin.getAgeService() == null) {
+                return notFound;
+            }
+            return String.valueOf(this.plugin.getAgeService().getAge(uuid));
+        }
+        if (p.equals("birthday")) {
+            if (this.plugin.getAgeService() == null) {
+                return notFound;
+            }
+            return this.plugin.getAgeService().getBirthday(uuid);
+        }
+        if (p.equals("birthday_emoji") || p.equals("birthday_tab")) {
+            if (this.plugin.getAgeService() == null) {
+                return "";
+            }
+            return this.plugin.getAgeService().getFormattedBirthdayForTab(uuid);
+        }
         if (p.equals("score") || p.equals("likes") || p.equals("dislikes") || p.equals("votes") || p.equals("rank")) {
             PlayerRep rep = this.plugin.getReputationService().getOrCreate(uuid, player.getName() != null ? player.getName() : "\u0418\u0433\u0440\u043e\u043a");
             if (p.equals("score")) {

@@ -40,24 +40,52 @@ items:
       - "§7Голосов: §f%votes%"
 
   profile_status:
-    material: HEART_OF_THE_SEA
-    name: "§fСоц. статус §7— §f%target%"
+    material: PLAYER_HEAD
+    name: "§f%target%"
     lore:
-      - "§7Пол: §f%gender_emoji% %gender%"
+      - "§7Страна: §f%country%"
+      - "§7Дата рождения: §f%birthday% §7(§f%age% §7лет)"
+      - "§7Пол: %gender_emoji% §f%gender%"
       - "§7Брак: §f%married%"
-      - "§7Партнёр: §f%spouse%"
+      - "§7Супруг(а): §f%spouse%"
+
+  profile_country:
+    material: MAP
+    name: "§fСтрана"
+    lore:
+      - "§7Страна: §f%country%"
+
+  profile_birthday:
+    material: CAKE
+    name: "§fДата рождения"
+    lore:
+      - "§7Дата: §f%birthday%"
+      - "§7Возраст: §f%age% §7лет"
+
+  profile_gender:
+    material: LIME_DYE
+    name: "§fПол"
+    lore:
+      - "§7Пол: %gender_emoji% §f%gender%"
+
+  profile_marriage:
+    material: RED_DYE
+    name: "§fСемейный статус"
+    lore:
+      - "§7Статус: §f%married%"
+      - "§7Супруг(а): §f%spouse%"
       - "§7С: §f%since%"
 
-profile_info:
-  material: PAPER
-  name: "§fПрофиль §7— §f%target%"
-  lore:
-    - "§7Рейтинг: §f%score% §7(место: §f%rank%§7)"
-    - "§7Лайки: §a%likes% §7/ Дизлайки: §c%dislikes%"
-    - "§7Голосов: §f%votes%"
-    - ""
-    - "§7Топ теги:"
-    - "%tags%"
+  profile_info:
+    material: PAPER
+    name: "§fПрофиль §7— §f%target%"
+    lore:
+      - "§7Рейтинг: §f%score% §7(место: §f%rank%§7)"
+      - "§7Лайки: §a%likes% §7/ Дизлайки: §c%dislikes%"
+      - "§7Голосов: §f%votes%"
+      - ""
+      - "§7Топ теги:"
+      - "%tags%"
 
   profile_history:
     material: BOOK

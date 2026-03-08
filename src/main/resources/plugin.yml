@@ -28,6 +28,14 @@ commands:
     description: Sit on the ground
     usage: /sit
     permission: refontsocial.sit.use
+  country:
+    description: Set your country in profile
+    usage: /country help
+    permission: refontsocial.country.use
+  age:
+    description: Set your age in profile
+    usage: /age help
+    permission: refontsocial.age.use
   friends:
     aliases: [friend]
     description: Friends system command
@@ -50,6 +58,10 @@ permissions:
   refontsocial.gender.use:
     default: true
   refontsocial.sit.use:
+    default: true
+  refontsocial.country.use:
+    default: true
+  refontsocial.age.use:
     default: true
   refontsocial.friends.use:
     default: true

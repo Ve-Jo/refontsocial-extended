@@ -48,8 +48,9 @@ help:
   - "%prefix%§f/marry help §7— команды брака"
   - "%prefix%§f/gender help §7— команды пола"
   - "%prefix%§f/sit §7— сесть"
-  - "%prefix%§f/lay §7— лечь"
   - "%prefix%§f/friends help §7— друзья"
+  - "%prefix%§f/country help §7— страна"
+  - "%prefix%§f/age help §7— возраст"
   - "%prefix%§f/rep reload §7— перезагрузка (админ)"
 reasonInvalidForVote: "%prefix%§cВыбранная причина не подходит для этой оценки."
 
@@ -103,12 +104,38 @@ genderHelp:
   - "%prefix%§f/gender §7— показать текущий пол"
   - "%prefix%§f/gender set <male|female|nonbinary|other|undisclosed> §7— изменить пол"
 
+countryCurrent: "%prefix%§7Текущая страна: §f%country%§7."
+countrySet: "%prefix%§aСтрана обновлена: §f%country%§a."
+countryCleared: "%prefix%§aСтрана удалена."
+countryInvalid: "%prefix%§cНекорректное название страны. Используй §f/country list§c для просмотра доступных."
+countryInvalidSuggest: "%prefix%§cСтрана §f%input%§c не найдена. Возможно, вы имели в виду: §f%suggestion%§c?"
+countryListHeader: "%prefix%§fДоступные страны:"
+countryListFooter: "%prefix%§7Страница §f%page%§7 из §f%total%"
+countryUsage: "%prefix%§cИспользование: §f/country set <название>§c или §f/country <название>§c или §f/country clear§c."
+countryChangeDisabled: "%prefix%§cИзменение страны отключено на сервере."
+
+countryHelp:
+  - "%prefix%§f/country §7— показать текущую страну"
+  - "%prefix%§f/country <название> §7— установить страну (можно частично: 'ukr' → '🇺🇦 Ukraine')"
+  - "%prefix%§f/country set <название> §7— установить страну"
+  - "%prefix%§f/country list §7— список доступных стран"
+  - "%prefix%§f/country clear §7— удалить страну"
+
+birthdayCurrent: "%prefix%§7Дата рождения: §f%birthday%§7. Возраст: §f%age%§7."
+birthdaySet: "%prefix%§aДата рождения установлена: §f%birthday%§a. Возраст: §f%age%§a."
+birthdayCleared: "%prefix%§aДата рождения удалена."
+birthdayInvalid: "%prefix%§cНекорректная дата. Формат: §fдд.мм.гггг§c. Диапазон возраста: §f%min%§7-§f%max%§c."
+birthdayChangeCooldown: "%prefix%§cДату рождения можно менять только раз в месяц."
+birthdayChangeDisabled: "%prefix%§cИзменение даты рождения отключено на сервере."
+
+birthdayHelp:
+  - "%prefix%§f/age §7— показать дату рождения и возраст"
+  - "%prefix%§f/age <дд.мм.гггг> §7— установить дату рождения (раз в месяц)"
+  - "%prefix%§f/age clear §7— удалить дату рождения"
+
 sitStart: "%prefix%§7Ты сел(а)."
 sitStop: "%prefix%§7Ты встал(а)."
 sitCannot: "%prefix%§cЗдесь нельзя сесть."
-layStart: "%prefix%§7Ты лёг(ла)."
-layStop: "%prefix%§7Ты встал(а)."
-layCannot: "%prefix%§cЗдесь нельзя лечь."
 
 friendsHelp:
   - "%prefix%§f/friends §7— открыть меню друзей"

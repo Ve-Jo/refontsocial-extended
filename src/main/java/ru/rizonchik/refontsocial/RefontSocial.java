@@ -24,6 +24,8 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.rizonchik.refontsocial.command.AgeCommand;
+import ru.rizonchik.refontsocial.command.CountryCommand;
 import ru.rizonchik.refontsocial.command.FriendsCommand;
 import ru.rizonchik.refontsocial.command.GenderCommand;
 import ru.rizonchik.refontsocial.command.MarriageCommand;
@@ -34,6 +36,8 @@ import ru.rizonchik.refontsocial.listener.FriendsListener;
 import ru.rizonchik.refontsocial.listener.InteractionTracker;
 import ru.rizonchik.refontsocial.listener.SeenListener;
 import ru.rizonchik.refontsocial.placeholder.ReputationExpansion;
+import ru.rizonchik.refontsocial.service.AgeService;
+import ru.rizonchik.refontsocial.service.CountryService;
 import ru.rizonchik.refontsocial.service.FriendsService;
 import ru.rizonchik.refontsocial.service.GenderService;
 import ru.rizonchik.refontsocial.service.MarriageService;
@@ -61,6 +65,8 @@ extends JavaPlugin {
     private MarriageService marriageService;
     private GenderService genderService;
     private FriendsService friendsService;
+    private CountryService countryService;
+    private AgeService ageService;
     private SitManager sitManager;
     private VisualIndicatorsHook visualIndicatorsHook;
 
@@ -92,6 +98,14 @@ extends JavaPlugin {
         SitCommand sitCommand = new SitCommand(this);
         if (this.getCommand("sit") != null) {
             this.getCommand("sit").setExecutor((CommandExecutor)sitCommand);
+        }
+        CountryCommand countryCommand = new CountryCommand(this);
+        if (this.getCommand("country") != null) {
+            this.getCommand("country").setExecutor((CommandExecutor)countryCommand);
+        }
+        AgeCommand ageCommand = new AgeCommand(this);
+        if (this.getCommand("age") != null) {
+            this.getCommand("age").setExecutor((CommandExecutor)ageCommand);
         }
         FriendsCommand friendsCommand = new FriendsCommand(this);
         if (this.getCommand("friends") != null) {
@@ -141,6 +155,14 @@ extends JavaPlugin {
         if (this.friendsService != null) {
             this.friendsService.shutdown();
             this.friendsService = null;
+        }
+        if (this.countryService != null) {
+            this.countryService.shutdown();
+            this.countryService = null;
+        }
+        if (this.ageService != null) {
+            this.ageService.shutdown();
+            this.ageService = null;
         }
         if (this.sitManager != null) {
             HandlerList.unregisterAll((Listener)this.sitManager);
@@ -207,6 +229,18 @@ extends JavaPlugin {
             this.genderService.shutdown();
             this.genderService = null;
         }
+        if (this.friendsService != null) {
+            this.friendsService.shutdown();
+            this.friendsService = null;
+        }
+        if (this.countryService != null) {
+            this.countryService.shutdown();
+            this.countryService = null;
+        }
+        if (this.ageService != null) {
+            this.ageService.shutdown();
+            this.ageService = null;
+        }
         if (this.sitManager != null) {
             HandlerList.unregisterAll((Listener)this.sitManager);
             this.sitManager.shutdown();
@@ -230,6 +264,10 @@ extends JavaPlugin {
         this.genderService.init();
         this.friendsService = new FriendsService(this);
         this.friendsService.init();
+        this.countryService = new CountryService(this);
+        this.countryService.init();
+        this.ageService = new AgeService(this);
+        this.ageService.init();
         this.sitManager = new SitManager(this);
         this.reputationService = new ReputationService(this, this.storage);
         this.guiService = new GuiService(this, this.reputationService);
@@ -305,6 +343,14 @@ extends JavaPlugin {
 
     public FriendsService getFriendsService() {
         return this.friendsService;
+    }
+
+    public CountryService getCountryService() {
+        return this.countryService;
+    }
+
+    public AgeService getAgeService() {
+        return this.ageService;
     }
 
     public VisualIndicatorsHook getVisualIndicatorsHook() {

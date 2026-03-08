@@ -130,6 +130,21 @@ gender:
     other: "Другое"
     undisclosed: "Не указан"
 
+country:
+  default: "" # Default empty (not specified)
+  notSetDisplay: "§7Не указана" # Display when not set
+  allowSelfChange: true # Allow players to change their own country
+  # Countries are defined in countries.yml file
+
+birthday:
+  default: "" # Default empty (not specified)
+  min: 13 # Minimum age (calculated from birthday)
+  max: 100 # Maximum age (calculated from birthday)
+  notSetDisplay: "§7Не указан" # Display when not set
+  allowSelfChange: true # Allow players to change their own birthday
+  changeCooldownMonths: 1 # How many months must pass before changing birthday again
+  tabEmoji: "§6❤" # Emoji shown in TAB on player's birthday
+
 gui:
   top:
     title: "§x§C§4§8§4§E§2Р§x§C§4§8§7§E§1е§x§C§4§8§A§E§0п§x§C§4§8§D§D§Fу§x§C§4§9§0§D§Eт§x§C§3§9§2§D§Cа§x§C§3§9§5§D§Bц§x§C§3§9§8§D§Aи§x§C§3§9§B§D§9я §7• §fТоп"
